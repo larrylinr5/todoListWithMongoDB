@@ -2,10 +2,12 @@ const http = require("http");
 /** 載入 mongoose 套件 */
 const mongoose = require('mongoose');
 /** 載入 全域變數套件 */
-const dotenv = require('dotenv')
+const dotenv = require('dotenv');
 
 // 全域變數套件設定
 dotenv.config({ path: "./config.env" })
+
+const libs = require('./libs');
 
 //#region 連接資料庫
 // 本地連線
@@ -27,7 +29,14 @@ mongoose.connect(connectString)
 //#endregion
 
 const requestListener = (req, res) => {
-  console.log('hello')
+  const { headers, message } = libs
+  
+  if (method === "OPTIONS") {
+    res.writeHead(200, headers)
+    res.end()
+  } else {
+    errorHandler(res, 404, message[404])
+  }
 }
 
 const server = http.createServer(requestListener);
