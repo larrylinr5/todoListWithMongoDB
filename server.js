@@ -8,6 +8,9 @@ const dotenv = require('dotenv');
 dotenv.config({ path: "./config.env" })
 
 const libs = require('./libs');
+const { successHandler, errorHandler } = require('./responseHandler');
+const Todo = require("./models/todo");
+//const { getTodo, getTodos } = require('./getTodo');
 
 //#region 連接資料庫
 // 本地連線
@@ -28,10 +31,26 @@ mongoose.connect(connectString)
   });
 //#endregion
 
-const requestListener = (req, res) => {
+const requestListener = async (req, res) => {
   const { headers, message } = libs
-  
-  if (method === "OPTIONS") {
+  const { url, method } = req
+
+  if (url === "/todos" && method === "GET") {
+    const todos = await Todo.find();
+    console.log(todos)
+    successHandler(res, todos)
+  } else if (url.startsWith("/todos/") && method === "GET") {
+    const id = req.url.split('/').pop();
+    const todos = await Todo.find();
+    const index = todos.findIndex((todo) => todo._id === id);
+
+    if (index !== -1) {
+      successHandler(res, todos[index]);
+    } else {
+      const { noData } = message
+      errorHandler(res, 400, noData);
+    }
+  } else if (method === "OPTIONS") {
     res.writeHead(200, headers)
     res.end()
   } else {
