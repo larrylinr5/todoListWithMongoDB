@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const todoSchema = new mongoose.Schema(
     {
+        _id: String,
         title: String,
         //自訂義時間戳記
         createdAt: {
